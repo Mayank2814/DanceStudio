@@ -43,6 +43,8 @@ Class emoji
 Mark Attendance: Main tab for marking attendance
 Attendance History: For viewing past records (ready for future enhancement)
 Page Layout
+
+
 ┌─────────────────────────────────────────────────┐
 │ ← Back to Dashboard                              │
 ├─────────────────────────────────────────────────┤
@@ -63,6 +65,9 @@ Page Layout
 │ └──────────────────────────────────────────────┘ │
 │                        [Save All Attendance] ►   │
 └─────────────────────────────────────────────────┘
+
+
+
 How to Use
 Step 1: Navigate to Class
 Login as instructor (admin account)
