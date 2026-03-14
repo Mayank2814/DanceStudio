@@ -1,0 +1,141 @@
+# Razorpay Integration Setup Guide
+
+## 🎉 Razorpay Payment Gateway Integrated!
+
+The Dance Platform now supports payments via **Razorpay** with UPI and Net Banking options.
+
+---
+
+## 📋 Setup Instructions
+
+### 1. Get Razorpay Credentials (Free Test Mode)
+
+1. Go to [https://razorpay.com](https://razorpay.com) and sign up for a free account
+2. Once logged in, go to **Settings → API Keys** 
+3. Generate **Test Mode** keys (no verification required for testing)
+4. You'll get:
+   - **Key ID** (starts with `rzp_test_`)
+   - **Key Secret**
+
+### 2. Add Credentials to Backend
+
+Open `/backend/.env` and add:
+
+```env
+RAZORPAY_KEY_ID=rzp_test_YOUR_KEY_ID_HERE
+RAZORPAY_KEY_SECRET=YOUR_KEY_SECRET_HERE
+```
+
+### 3. Restart Backend Server
+
+```bash
+cd backend
+npm run dev
+```
+
+---
+
+## 🎯 Features Implemented
+
+✅ **Payment Integration**
+- Razorpay checkout modal with UPI & Net Banking
+- Automatic payment verification
+- Secure signature validation
+
+✅ **Enrollment Flow**
+- Free classes: Direct enrollment
+- Paid classes: Payment → Verification → Enrollment
+- Shows price and payment methods on class detail page
+
+✅ **Payment Models**
+- Payment tracking in database
+- Order creation and verification
+- Transaction history
+
+✅ **Security**
+- Server-side payment verification
+- Signature validation using HMAC SHA256
+- Protected routes with JWT authentication
+
+---
+
+## 💳 Test Payment Methods
+
+### UPI Test Credentials:
+- **UPI ID**: `success@razorpay`
+- **Status**: Payment will succeed
+
+### Net Banking Test:
+1. Select any bank in test mode
+2. Use default credentials provided by Razorpay
+
+### Card Test (if enabled):
+- **Card Number**: `4111 1111 1111 1111`
+- **CVV**: Any 3 digits
+- **Expiry**: Any future date
+
+---
+
+## 🔄 Payment Flow
+
+1. User clicks "Pay ₹XX & Enroll" button
+2. Razorpay checkout modal opens
+3. User selects UPI/Net Banking
+4. Completes payment
+5. Backend verifies payment signature
+6. User is automatically enrolled in class
+7. Success confirmation shown
+
+---
+
+## 🧪 Testing
+
+1. Create a paid class (set price > 0)
+2. Login as a student user
+3. Go to class details
+4. Click "Pay & Enroll"
+5. Use test UPI ID: `success@razorpay`
+6. Payment succeeds and enrolls user
+
+---
+
+## 📁 Files Created
+
+**Backend:**
+- `/controllers/paymentController.js` - Payment logic
+- `/routes/payment.js` - Payment routes
+- `/models/Payment.js` - Payment schema
+
+**Frontend:**
+- `/services/payment.js` - Payment API calls
+- `/hooks/useRazorpay.js` - Razorpay hook
+- Updated `/pages/ClassDetail.jsx` - Payment UI
+
+---
+
+## 🚀 Going Live
+
+To switch to **Live Mode**:
+1. Complete KYC on Razorpay dashboard
+2. Get **Live API Keys** (start with `rzp_live_`)
+3. Update `.env` with live keys
+4. Test thoroughly before going live
+
+---
+
+## 💡 Notes
+
+- Free classes (price = 0) skip payment
+- Paid classes require Razorpay payment
+- All transactions are recorded in Payment model
+- Admin users cannot enroll in classes
+
+---
+
+## 🆘 Support
+
+For Razorpay issues:
+- [Razorpay Docs](https://razorpay.com/docs/)
+- [Test Cards](https://razorpay.com/docs/payments/test-card-details/)
+
+**Please add your Razorpay credentials to `/backend/.env` file now!**

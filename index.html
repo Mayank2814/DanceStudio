@@ -1,0 +1,232 @@
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/auth');
+const Attendance = require('../models/Attendance');
+const Class = require('../models/Class');
+
+// @route   POST /api/attendance/mark
+// @desc    Mark attendance for a student
+// @access  Private (Instructor only)
+router.post('/mark', protect, async (req, res) => {
+  try {
+    const { classId, studentId, status, notes } = req.body;
+
+    // Validate input
+    if (!classId || !studentId || !status) {
+      return res.status(400).json({
+        success: false,
+        message: 'classId, studentId, and status are required'
+      });
+    }
+
+    if (!['present', 'absent', 'excused'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status must be present, absent, or excused'
+      });
+    }
+
+    // Verify the class exists and instructor is the owner or user is admin
+    const classData = await Class.findById(classId);
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Class not found'
+      });
+    }
+
+    // Allow if user is admin or created the class
+    if (req.user.role !== 'admin' && classData.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to mark attendance for this class'
+      });
+    }
+
+    // Check if student is enrolled
+    if (!classData.enrolledStudents.includes(studentId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Student is not enrolled in this class'
+      });
+    }
+
+    // Create or update attendance record for today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const attendance = await Attendance.findOneAndUpdate(
+      {
+        classId,
+        studentId,
+        date: { $gte: today, $lt: tomorrow }
+      },
+      {
+        status,
+        notes,
+        markedBy: req.user._id,
+        markedAt: new Date()
+      },
+      { new: true, upsert: true }
+    );
+
+    res.json({
+      success: true,
+      data: attendance
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error marking attendance'
+    });
+  }
+});
+
+// @route   GET /api/attendance/class/:classId
+// @desc    Get attendance records for a class
+// @access  Private (Instructor only)
+router.get('/class/:classId', protect, async (req, res) => {
+  try {
+    const { classId } = req.params;
+    const { date } = req.query;
+
+    // Verify the class exists and instructor is the owner
+    const classData = await Class.findById(classId);
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Class not found'
+      });
+    }
+
+    if (classData.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view attendance for this class'
+      });
+    }
+
+    // Build query
+    let query = { classId };
+
+    if (date) {
+      const dateObj = new Date(date);
+      dateObj.setHours(0, 0, 0, 0);
+      const nextDay = new Date(dateObj);
+      nextDay.setDate(nextDay.getDate() + 1);
+      query.date = { $gte: dateObj, $lt: nextDay };
+    }
+
+    const attendance = await Attendance.find(query)
+      .populate('studentId', 'name email')
+      .sort('-date');
+
+    res.json({
+      success: true,
+      data: attendance
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching attendance'
+    });
+  }
+});
+
+// @route   GET /api/attendance/student/:studentId
+// @desc    Get attendance records for a student
+// @access  Private
+router.get('/student/:studentId', protect, async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const attendance = await Attendance.find({ studentId })
+      .populate('classId', 'title style')
+      .sort('-date');
+
+    res.json({
+      success: true,
+      data: attendance
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching attendance'
+    });
+  }
+});
+
+// @route   GET /api/attendance/class/:classId/today
+// @desc    Get today's attendance for a class
+// @access  Private (Instructor of class or Admin)
+router.get('/class/:classId/today', protect, async (req, res) => {
+  try {
+    const { classId } = req.params;
+
+    // Verify the class exists and instructor is the owner or user is admin
+    const classData = await Class.findById(classId).populate('enrolledStudents', 'name email');
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        message: 'Class not found'
+      });
+    }
+
+    // Allow if user is admin or created the class
+    if (req.user.role !== 'admin' && classData.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to view attendance for this class'
+      });
+    }
+
+    // Get today's date range
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Get attendance records for today
+    const attendanceRecords = await Attendance.find({
+      classId,
+      date: { $gte: today, $lt: tomorrow }
+    });
+
+    // Map enrolled students with their attendance
+    const enrolledStudents = classData.enrolledStudents || [];
+    const attendanceMap = {};
+    attendanceRecords.forEach(record => {
+      attendanceMap[record.studentId.toString()] = record;
+    });
+
+    const attendance = enrolledStudents.map(student => {
+      const record = attendanceMap[student._id.toString()];
+      return {
+        _id: record?._id,
+        studentId: student._id,
+        name: student.name,
+        email: student.email,
+        status: record?.status || 'absent',
+        notes: record?.notes || ''
+      };
+    });
+
+    res.json({
+      success: true,
+      data: attendance
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error fetching attendance'
+    });
+  }
+});
+
+module.exports = router;
