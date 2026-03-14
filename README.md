@@ -1,117 +1,274 @@
-Class Management Page - Attendance Marking
-Overview
-Instructors now have a dedicated page to view enrolled students and mark their attendance for each class.
+# 🎓 Class Management System – Attendance Tracking
 
-Features
-1. Class Management Page
-Route: /class/:id/manage (Protected - Instructors only)
-Access: Click "👁️ View" button next to any class in Dashboard
-2. Student Display
-Shows all enrolled students in a table format
-Display: Student Name | Email | Status | Notes | Action
-3. Attendance Marking
-Status Options:
+A **full-stack class management platform** that allows instructors to manage classes and efficiently mark student attendance.
+The system provides a **dedicated class management page** where instructors can view enrolled students, mark attendance, add notes, and track attendance records.
 
-✅ Present (Green)
-❌ Absent (Red)
-⚠️ Excused (Yellow)
-Notes Field: Add optional notes for each student
+---
 
-"Left early"
-"Medical leave"
-Any custom notes
-Date Selector: Choose the date for attendance
+# 🚀 Features
 
-Defaults to today's date
-Can select any past/future date
-4. Buttons
-Individual Save
-Click "Save" button next to each student
-Saves that specific student's attendance
-Save All
-Gold button at the bottom
-Saves all students' attendance at once
-Faster for marking entire class
-5. Class Header
-Class name and description
-Instructor name
-Schedule (Day & Time)
-Class style and level
-Student count
-Class emoji
-6. Tabs
-Mark Attendance: Main tab for marking attendance
-Attendance History: For viewing past records (ready for future enhancement)
-Page Layout
+## 📚 Class Management Page
 
+* Route: `/class/:id/manage`
+* Protected route (only accessible by instructors)
+* Accessible through the **👁️ View** button in the dashboard
 
+### Class Header Information
+
+Displays essential class details:
+
+* Class name and emoji
+* Instructor name
+* Schedule (Day & Time)
+* Duration
+* Class style and level
+* Total number of students
+
+---
+
+# 👨‍🎓 Student Display
+
+Students enrolled in the class are displayed in a **structured table format**.
+
+| Name         | Email                                         | Status                 | Notes          | Action |
+| ------------ | --------------------------------------------- | ---------------------- | -------------- | ------ |
+| Student Name | [student@email.com](mailto:student@email.com) | Present/Absent/Excused | Optional Notes | Save   |
+
+This allows instructors to quickly view and manage attendance.
+
+---
+
+# ✅ Attendance Marking
+
+Instructors can mark attendance using the following status options:
+
+* ✅ **Present** – Student attended the class
+* ❌ **Absent** – Student did not attend
+* ⚠️ **Excused** – Absence with valid reason
+
+### Notes Field
+
+Optional notes can be added for each student.
+
+Examples:
+
+* "Left early"
+* "Medical leave"
+* "Family emergency"
+
+---
+
+# 📅 Date Selector
+
+Attendance can be recorded for any date.
+
+Features:
+
+* Defaults to **today’s date**
+* Allows selecting **past or future dates**
+
+---
+
+# 💾 Save Options
+
+## Individual Save
+
+Each row contains a **Save button** to store attendance for a single student.
+
+## Save All
+
+A **Save All Attendance** button allows instructors to save attendance for the entire class simultaneously.
+
+This is useful for quickly marking attendance for multiple students.
+
+---
+
+# 🧭 Page Layout
+
+```
 ┌─────────────────────────────────────────────────┐
-│ ← Back to Dashboard                              │
+│ ← Back to Dashboard                             │
 ├─────────────────────────────────────────────────┤
-│ Class Name              [Class Emoji]            │
-│ Instructor | Schedule | Duration | Students     │
+│ Class Name                [Class Emoji]         │
+│ Instructor | Schedule | Duration | Students    │
 ├─────────────────────────────────────────────────┤
-│ [Mark Attendance] [Attendance History]           │
+│ [Mark Attendance]  [Attendance History]        │
 ├─────────────────────────────────────────────────┤
-│ Date: [________] (Date Selector)                 │
+│ Date: [________]                                │
 ├─────────────────────────────────────────────────┤
-│ Student Table:                                   │
-│ ┌──────────────────────────────────────────────┐ │
-│ │ Name    │ Email  │ Status │ Notes │ Action   │ │
-│ ├─────────┼────────┼────────┼───────┼──────────┤ │
-│ │ John    │ j@test │ [▼]    │ (...) │ [Save]   │ │
-│ │ Jane    │ j@test │ [▼]    │ (...) │ [Save]   │ │
-│ │ Bob     │ b@test │ [▼]    │ (...) │ [Save]   │ │
-│ └──────────────────────────────────────────────┘ │
-│                        [Save All Attendance] ►   │
+│ Student Table                                   │
+│ Name | Email | Status | Notes | Save           │
+│                                              │
+│                       [Save All Attendance]    │
 └─────────────────────────────────────────────────┘
+```
 
+---
 
+# ⚙️ How to Use
 
-How to Use
-Step 1: Navigate to Class
-Login as instructor (admin account)
-Go to Dashboard
-Click "👁️ View" button on any class
-Step 2: Mark Attendance
-Select date using date selector (defaults to today)
-For each student:
-Click dropdown under "Status"
-Select: Present, Absent, or Excused
-(Optional) Add notes in Notes field
-Step 3: Save
-Option A: Click individual "Save" buttons
-Option B: Click "Save All Attendance" to save entire class
-Step 4: Confirmation
-Success message appears after saving
-Records are stored in database with:
-Student name
-Status (present/absent/excused)
-Notes (if provided)
+## Step 1 — Navigate to Class
+
+1. Login as an instructor.
+2. Go to the **Dashboard**.
+3. Click the **👁️ View** button next to a class.
+
+---
+
+## Step 2 — Mark Attendance
+
+1. Select the desired date.
+2. Choose a **status** for each student.
+3. Optionally add notes.
+
+---
+
+## Step 3 — Save Attendance
+
+Two options are available:
+
+* Save individual student attendance
+* Save all attendance records at once
+
+---
+
+## Step 4 — Confirmation
+
+After saving:
+
+* A success message appears
+* Attendance records are stored in the database with:
+
+```
+Student ID
+Attendance Status
+Notes
 Date
 Timestamp
-API Integration
-Backend Endpoints Used
-GET /api/classes/:id - Fetch class details
-GET /api/attendance/class/:classId/today - Get today's attendance with enrolled students
-POST /api/attendance/mark - Mark individual attendance
-Color Scheme
-Present: Green (#10b981)
-Absent: Red (#ef4444)
-Excused: Yellow (#eab308)
-Save Button: Pink (#EC4899)
-Save All Button: Gold (#F59E0B)
-Responsive Design
-Desktop: Full table view
-Tablet: Horizontal scrolling table
-Mobile: Optimized for smaller screens
-Security
-Only instructors can access their own classes
-Authorization check prevents unauthorized access
-Protected route requires authentication
-Future Enhancements
-Export attendance to CSV/PDF
-Bulk attendance import
-Attendance statistics and reports
-Email notifications for absences
-Attendance trends analysis
+Instructor ID
+```
+
+---
+
+# 🔗 API Integration
+
+The frontend communicates with backend APIs.
+
+### Endpoints Used
+
+**Get Class Details**
+
+```
+GET /api/classes/:id
+```
+
+**Get Today's Attendance**
+
+```
+GET /api/attendance/class/:classId/today
+```
+
+**Mark Attendance**
+
+```
+POST /api/attendance/mark
+```
+
+---
+
+# 🎨 UI Color Scheme
+
+| Status          | Color              |
+| --------------- | ------------------ |
+| Present         | `#10b981` (Green)  |
+| Absent          | `#ef4444` (Red)    |
+| Excused         | `#eab308` (Yellow) |
+| Save Button     | `#EC4899` (Pink)   |
+| Save All Button | `#F59E0B` (Gold)   |
+
+---
+
+# 📱 Responsive Design
+
+The system is optimized for multiple devices.
+
+**Desktop**
+
+* Full table layout
+
+**Tablet**
+
+* Horizontal scrollable table
+
+**Mobile**
+
+* Compact and optimized layout
+
+---
+
+# 🔒 Security
+
+* Protected routes with authentication
+* Only instructors can access their classes
+* Authorization checks prevent unauthorized access
+* Secure API communication
+
+---
+
+# 🛠 Tech Stack
+
+Frontend
+
+* React
+* JavaScript
+* CSS
+
+Backend
+
+* Node.js
+* Express.js
+
+Database
+
+* MongoDB
+
+Authentication
+
+* JWT
+
+---
+
+# 📊 Future Enhancements
+
+Planned improvements include:
+
+* Export attendance to **CSV / PDF**
+* Attendance analytics dashboard
+* Bulk attendance import
+* Email notifications for absences
+* Attendance trend visualization
+* Student performance tracking
+
+---
+
+# 📷 Screenshots
+
+Add screenshots here:
+
+```
+/screenshots/dashboard.png
+/screenshots/manage-class.png
+/screenshots/attendance-table.png
+```
+
+---
+
+# 👨‍💻 Author
+
+Developed by **Mayank Sagar**
+
+---
+
+# ⭐ Support
+
+If you like this project, please give it a **star on GitHub** ⭐
